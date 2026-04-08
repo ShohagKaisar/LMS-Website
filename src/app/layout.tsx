@@ -1,0 +1,54 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "LearnHub - Online Learning Platform",
+  description: "Unlock your potential with world-class online courses. Learn from expert instructors, build real skills, and advance your career.",
+  keywords: ["online learning", "courses", "education", "e-learning", "skills", "career"],
+  authors: [{ name: "LearnHub Team" }],
+  icons: {
+    icon: "/logo.svg",
+  },
+  openGraph: {
+    title: "LearnHub - Online Learning Platform",
+    description: "Unlock your potential with world-class online courses.",
+    type: "website",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
