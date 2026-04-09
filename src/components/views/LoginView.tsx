@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, EyeOff, LogIn } from 'lucide-react'
+import { Eye, EyeOff, LogIn, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { useAppStore } from '@/lib/store'
-import { getDemoUsers } from '@/lib/api'
+import { loginUser, getDemoUsers } from '@/lib/api'
 
 export default function LoginView() {
   const { login, navigate } = useAppStore()
@@ -17,15 +17,41 @@ export default function LoginView() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Try to match demo users
-    const demoUsers = getDemoUsers()
-    const user = demoUsers.find((u) => u.email === email) || demoUsers[2]
-    login(user)
-    const view = user.role === 'admin' ? 'admin-dashboard' : user.role === 'instructor' ? 'instructor-dashboard' : 'dashboard'
-    navigate(view)
+    setError('')
+    setLoading(true)
+
+    try {
+      const result = await loginUser(email, password)
+      if (result.success && result.data) {
+        const roleMap: Record<string, string> = {
+          ADMIN: 'admin',
+          INSTRUCTOR: 'instructor',
+          STUDENT: 'student',
+        }
+        const user = {
+          id: result.data.id,
+          name: result.data.name,
+          email: result.data.email,
+          role: roleMap[result.data.role] || result.data.role.toLowerCase(),
+          avatar: result.data.image || '',
+          bio: result.data.bio || '',
+        }
+        login(user)
+        const view = user.role === 'admin' ? 'admin-dashboard' : user.role === 'instructor' ? 'instructor-dashboard' : 'dashboard'
+        navigate(view)
+      } else {
+        setError(result.error || 'Invalid credentials')
+      }
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDemoLogin = (role: 'admin' | 'instructor' | 'student') => {
@@ -52,18 +78,27 @@ export default function LoginView() {
             <p className="text-xs text-muted-foreground mb-3 text-center font-medium">Quick Demo Login</p>
             <div className="grid grid-cols-3 gap-2">
               <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => handleDemoLogin('student')}>
-                👨‍🎓 Student
+                Student
               </Button>
               <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => handleDemoLogin('instructor')}>
-                👨‍🏫 Instructor
+                Instructor
               </Button>
               <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => handleDemoLogin('admin')}>
-                🛡️ Admin
+                Admin
               </Button>
             </div>
+            <p className="text-[10px] text-muted-foreground mt-2 text-center">
+              Or use: admin@lms.com / admin123
+            </p>
           </div>
 
           <Separator className="mb-6" />
+
+          {error && (
+            <div className="mb-4 p-3 bg-destructive/10 text-destructive text-sm rounded-lg text-center">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -89,7 +124,7 @@ export default function LoginView() {
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -107,8 +142,15 @@ export default function LoginView() {
               <Checkbox id="remember" checked={rememberMe} onCheckedChange={(v) => setRememberMe(v as boolean)} />
               <Label htmlFor="remember" className="text-sm">Remember me</Label>
             </div>
-            <Button type="submit" className="w-full h-11" size="lg">
-              Sign In
+            <Button type="submit" className="w-full h-11" size="lg" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </Button>
           </form>
 

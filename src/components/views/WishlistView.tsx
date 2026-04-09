@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Heart, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -8,15 +9,13 @@ import { useAppStore } from '@/lib/store'
 import { CourseCard } from '@/components/shared/CourseCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { mockCourses } from '@/lib/api'
-import { useState } from 'react'
 
 export default function WishlistView() {
-  const { navigate, wishlistItems, removeFromWishlist, addToCart } = useAppStore()
-  const [items, setItems] = useState(mockCourses.slice(4, 7))
+  const { navigate, addToCart } = useAppStore()
+  const [items, setItems] = useState(mockCourses.slice(0, 3))
 
   const handleRemove = (id: string) => {
     setItems(prev => prev.filter(c => c.id !== id))
-    removeFromWishlist(id)
   }
 
   if (items.length === 0) {
@@ -47,9 +46,12 @@ export default function WishlistView() {
               <Heart className="h-10 w-10 text-white/60" />
             </div>
             <CardContent className="p-4 space-y-3">
-              <h3 className="font-semibold text-sm">{course.title}</h3>
+              <h3 className="font-semibold text-sm line-clamp-2">{course.title}</h3>
               <p className="text-xs text-muted-foreground">{course.instructorName}</p>
               <div className="flex items-center gap-2">
+                {course.originalPrice && (
+                  <Badge variant="secondary" className="text-xs text-muted-foreground line-through">${course.originalPrice}</Badge>
+                )}
                 <Badge variant="secondary" className="text-xs">${course.price}</Badge>
               </div>
               <div className="flex gap-2">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Clock, CheckCircle, XCircle, ArrowLeft, ArrowRight, RotateCcw, Trophy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -85,6 +85,21 @@ export default function QuizView() {
   const [showReview, setShowReview] = useState(false)
   const [timeLeft, setTimeLeft] = useState(600)
 
+  useEffect(() => {
+    if (showResult) return
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          setShowResult(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [showResult])
+
   const question = questions[currentQ]
   const isAnswered = answers[currentQ] !== undefined
   const allAnswered = Object.keys(answers).length === questions.length
@@ -114,6 +129,7 @@ export default function QuizView() {
     setSelectedAnswer(null)
     setShowResult(false)
     setShowReview(false)
+    setTimeLeft(600)
   }
 
   if (showResult) {

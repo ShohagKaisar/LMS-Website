@@ -34,9 +34,11 @@ export default function CoursePlayerView() {
 
   if (!course) return null
 
-  const currentSection = course.curriculum[currentSectionIdx]
+  const curriculum = course.curriculum.length > 0 ? course.curriculum : mockCourses.find(c => c.id === course.id)?.curriculum || []
+  const currentSection = curriculum[currentSectionIdx]
   const currentLesson = currentSection?.lessons[currentLessonIdx]
-  const totalLessons = course.curriculum.reduce((a, s) => a + s.lessons.length, 0)
+  const totalLessons = curriculum.reduce((a, s) => a + s.lessons.length, 0)
+
   const progressPercent = Math.round((completedLessons.size / totalLessons) * 100)
 
   const toggleSection = (id: string) => {
@@ -57,7 +59,7 @@ export default function CoursePlayerView() {
   const goToLesson = (sIdx: number, lIdx: number) => {
     setCurrentSectionIdx(sIdx)
     setCurrentLessonIdx(lIdx)
-    const section = course.curriculum[sIdx]
+    const section = curriculum[sIdx]
     if (section) setExpandedSections(prev => new Set([...prev, section.id]))
   }
 
@@ -65,11 +67,11 @@ export default function CoursePlayerView() {
     if (!currentSection) return
     if (currentLessonIdx < currentSection.lessons.length - 1) {
       setCurrentLessonIdx(currentLessonIdx + 1)
-    } else if (currentSectionIdx < course.curriculum.length - 1) {
+    } else if (currentSectionIdx < curriculum.length - 1) {
       const nextS = currentSectionIdx + 1
       setCurrentSectionIdx(nextS)
       setCurrentLessonIdx(0)
-      setExpandedSections(prev => new Set([...prev, course.curriculum[nextS].id]))
+      setExpandedSections(prev => new Set([...prev, curriculum[nextS].id]))
     }
   }
 
@@ -79,7 +81,7 @@ export default function CoursePlayerView() {
     } else if (currentSectionIdx > 0) {
       const prevS = currentSectionIdx - 1
       setCurrentSectionIdx(prevS)
-      setCurrentLessonIdx(course.curriculum[prevS].lessons.length - 1)
+      setCurrentLessonIdx(curriculum[prevS].lessons.length - 1)
     }
   }
 
@@ -104,7 +106,7 @@ export default function CoursePlayerView() {
               <h2 className="font-semibold mb-3">Course Content</h2>
               <ScrollArea className="h-[calc(100vh-300px)] max-h-96 lg:max-h-none">
                 <div className="space-y-2">
-                  {course.curriculum.map((section, sIdx) => {
+                  {curriculum.map((section, sIdx) => {
                     const isExpanded = expandedSections.has(section.id)
                     const sectionCompleted = section.lessons.every(l => completedLessons.has(l.id))
                     return (

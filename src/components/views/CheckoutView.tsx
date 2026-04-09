@@ -13,7 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { CreditCard, CheckCircle2, ArrowLeft, ShoppingBag, Tag, Truck } from 'lucide-react'
 
 export function CheckoutView() {
-  const { navigate, cartItems, clearCart } = useAppStore()
+  const { navigate, goBack, cartItems, clearCart } = useAppStore()
   const [couponCode, setCouponCode] = useState('')
   const [couponApplied, setCouponApplied] = useState(false)
   const [couponDiscount, setCouponDiscount] = useState(0)
@@ -85,7 +85,7 @@ export function CheckoutView() {
 
   return (
     <div className="max-w-6xl mx-auto py-8 px-4">
-      <button onClick={() => navigate(-1) as any} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+      <button onClick={goBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
 
