@@ -17,7 +17,7 @@ Stage Summary:
 ---
 Task ID: 2
 Agent: full-stack-developer (API)
-Task: Build API routes + seed data
+Task: Build API routes + seed data.
 
 Work Log:
 - Created 25 API route files covering all CRUD operations
